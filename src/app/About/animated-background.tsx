@@ -1,10 +1,25 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-export const AnimatedBackground = () => {
+export const AnimatedBackground = ({
+  dotCount = 50, // Number of dots
+  animationDuration = 20, // Base animation duration
+  gradientColors = {
+    from: 'from-primary/5',
+    via: 'via-background',
+    to: 'to-background',
+  },
+}) => {
+  const isMobile = window.innerWidth <= 768;
+
   return (
-    <div className="fixed inset-0 -z-10 overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-background" />
+    <div className="fixed inset-0 -z-10 overflow-hidden" aria-hidden="true">
+      {/* Gradient Background */}
+      <div
+        className={`absolute inset-0 bg-gradient-to-br ${gradientColors.from} ${gradientColors.via} ${gradientColors.to}`}
+      />
+
+      {/* SVG Grid */}
       <div className="absolute inset-0 opacity-20 dark:opacity-30">
         <svg className="w-full h-full">
           <defs>
@@ -26,30 +41,33 @@ export const AnimatedBackground = () => {
           <rect width="100%" height="100%" fill="url(#grid)" />
         </svg>
       </div>
-      {[...Array(50)].map((_, i) => (
+
+      {/* Floating Dots */}
+      {[...Array(isMobile ? dotCount / 2 : dotCount)].map((_, i) => (
         <motion.div
           key={i}
           className="absolute h-1 w-1 rounded-full bg-primary/30 dark:bg-primary/50"
           initial={{
-            x: Math.random() * 100 + '%',
-            y: Math.random() * 100 + '%',
+            x: `${Math.random() * 100}%`,
+            y: `${Math.random() * 100}%`,
           }}
           animate={{
             x: [
-              Math.random() * 100 + '%',
-              Math.random() * 100 + '%',
-              Math.random() * 100 + '%',
+              `${Math.random() * 100}%`,
+              `${Math.random() * 100}%`,
+              `${Math.random() * 100}%`,
             ],
             y: [
-              Math.random() * 100 + '%',
-              Math.random() * 100 + '%',
-              Math.random() * 100 + '%',
+              `${Math.random() * 100}%`,
+              `${Math.random() * 100}%`,
+              `${Math.random() * 100}%`,
             ],
           }}
           transition={{
-            duration: 20 + Math.random() * 10,
+            duration: animationDuration + Math.random() * 10,
             repeat: Infinity,
-            ease: "linear",
+            ease: 'linear',
+            delay: Math.random() * 5, // Random delay for natural motion
           }}
         />
       ))}

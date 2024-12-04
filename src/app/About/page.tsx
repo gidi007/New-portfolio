@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
-import React, { useState } from 'react';
-import { motion, useScroll, useSpring } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { motion, useScroll, useSpring, useTransform } from 'framer-motion';
 import { Download, ExternalLink, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -21,6 +22,15 @@ export default function About() {
     restDelta: 0.001
   });
 
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   const handleDownloadCV = () => {
     const link = document.createElement('a');
     link.href = '/FAVOUR BAWA - RESUME.pdf';
@@ -28,11 +38,23 @@ export default function About() {
     link.click();
   }
 
+  const fadeInUpVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: (i: number) => ({
+      opacity: 1,
+      y: 0,
+      transition: {
+        delay: i * 0.1,
+        duration: 0.5,
+        ease: "easeOut"
+      }
+    })
+  };
+
   return (
     <>
       <AnimatedBackground />
       
-      {/* Progress Bar */}
       <motion.div
         className="fixed top-0 left-0 right-0 h-1 bg-primary z-50 origin-left"
         style={{ scaleX }}
@@ -40,7 +62,6 @@ export default function About() {
 
       <section className="py-8 md:py-20 min-h-screen">
         <div className="container px-4 mx-auto">
-          {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -57,14 +78,14 @@ export default function About() {
             </motion.div>
           </motion.div>
 
-          {/* Personal Info & Stats */}
           <div className="grid md:grid-cols-2 gap-8 mb-16">
             <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
+              variants={fadeInUpVariants}
+              initial="hidden"
+              animate="visible"
+              custom={0}
             >
-              <Card className="p-6 space-y-6">
+              <Card className="p-6 space-y-6 bg-opacity-80 backdrop-blur-sm">
                 <h3 className="text-xl md:text-2xl font-semibold flex items-center">
                   PERSONAL INFOS
                   <motion.span
@@ -76,9 +97,11 @@ export default function About() {
                   </motion.span>
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {Object.entries(personalInfo).map(([key, value]) => (
+                  {Object.entries(personalInfo).map(([key, value], index) => (
                     <motion.div
                       key={key}
+                      variants={fadeInUpVariants}
+                      custom={index + 1}
                       className="group p-3 rounded-lg hover:bg-primary/5 transition-colors"
                       whileHover={{ scale: 1.02 }}
                     >
@@ -123,19 +146,25 @@ export default function About() {
               {stats.map((stat, index) => (
                 <motion.div
                   key={stat.label}
-                  initial={{ opacity: 0, y: 50 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  variants={fadeInUpVariants}
+                  initial="hidden"
+                  animate="visible"
+                  custom={index + Object.keys(personalInfo).length + 1}
                 >
-                  <Card className="p-6 hover:shadow-lg transition-shadow">
+                  <Card className="p-6 hover:shadow-lg transition-shadow bg-opacity-80 backdrop-blur-sm">
                     <motion.div
                       className="text-center"
                       whileHover={{ scale: 1.05 }}
                       transition={{ type: "spring", stiffness: 300 }}
                     >
-                      <span className="block text-3xl font-bold text-primary mb-2">
+                      <motion.span 
+                        className="block text-3xl font-bold text-primary mb-2"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 * (index + 1), duration: 0.5 }}
+                      >
                         {stat.value}
-                      </span>
+                      </motion.span>
                       <span className="text-sm text-muted-foreground">
                         {stat.label}
                       </span>
@@ -146,7 +175,6 @@ export default function About() {
             </div>
           </div>
 
-          {/* Skills Section */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -163,21 +191,20 @@ export default function About() {
             </div>
           </motion.div>
 
-          {/* Experience & Education */}
           <div className="grid md:grid-cols-2 gap-8">
             <div>
               <h2 className="text-xl md:text-2xl font-semibold mb-6">EXPERIENCE</h2>
               <div className="space-y-6">
-                {experience.map((item) => (
-                  <TimelineCard key={item.title} item={item} direction="left" />
+                {experience.map((item, index) => (
+                  <TimelineCard key={item.title} item={item} direction="left" index={index} />
                 ))}
               </div>
             </div>
             <div>
               <h2 className="text-xl md:text-2xl font-semibold mb-6">EDUCATION</h2>
               <div className="space-y-6">
-                {education.map((item) => (
-                  <TimelineCard key={item.title} item={item} direction="right" />
+                {education.map((item, index) => (
+                  <TimelineCard key={item.title} item={item} direction="right" index={index} />
                 ))}
               </div>
             </div>
@@ -193,3 +220,4 @@ export default function About() {
     </>
   );
 }
+
